@@ -1,9 +1,8 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, request } from '@playwright/test';
 import tags from '../test-data/tags.json'
 
 
 test.beforeEach(async ({ page }) => {
-
   // await page.route('https://conduit-api.bondaracademy.com/api/tags', async route => {
   await page.route('*/**/api/tags', async route => {
     await route.fulfill({
@@ -12,10 +11,56 @@ test.beforeEach(async ({ page }) => {
   })
 
   await page.goto('https://conduit.bondaracademy.com/')
-
+  await page.getByText('Sign in').click()
+  await page.getByRole('textbox', { name: 'Email' }).fill('pwtest_90@test.com')
+  await page.getByRole('textbox', { name: 'Password' }).fill('welcome123')
+  await page.getByRole('button', { name: 'Sign in' }).click()
 })
 
 
 test('has title', async ({ page }) => {
+  // https://conduit-api.bondaracademy.com/api/articles?limit=10&offset=0
+  await page.route('*/**/api/articles*', async route => {
+    const response = await route.fetch()
+    const responseBody = await response.json()
+
+    responseBody.articles[0].title = "This is a MOCK test title"
+    responseBody.articles[0].description = "This is a MOCK description"
+
+    await route.fulfill({
+      body: JSON.stringify(responseBody)
+    })
+  })
+  await page.getByText('Global Feed').click()
   await expect(page.locator('.navbar-brand')).toHaveText('conduit')
+  await expect(page.locator('app-article-list h1').first()).toContainText('This is a MOCK test title')
+  await expect(page.locator('app-article-list p').first()).toContainText('This is a MOCK description')
+
 });
+
+test('delete article', async ({ page, request }) => {
+  const response = await request.post('https://conduit-api.bondaracademy.com/api/users/login', {
+    data: {
+      user: { email: "pwtest_90@test.com", password: "welcome123" }
+    }
+  })
+
+  const responseBody = await response.json()
+  const accessToken = responseBody.user.token
+  // console.log(accessToken)
+
+  const articleResponse = await request.post('https://conduit-api.bondaracademy.com/api/articles/', {
+    data: { article: { "tagList": [], "title": "This is a test article", description: "This is a test description", "body": "This is a test body" } },
+    headers: {
+      Authorization: `Token ${accessToken}`
+    }
+  })
+  expect(articleResponse.status()).toBe(201)
+
+  await page.getByText('Global Feed').click()
+  await page.getByText('This is a test article').click()
+  await page.getByRole('button', { name: 'Delete Article' }).first().click()
+  await page.getByText('Global Feed').click()
+
+  await expect(page.locator('app-article-list h1').first()).not.toContainText('This is a test title')
+})
