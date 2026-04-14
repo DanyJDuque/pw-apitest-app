@@ -39,21 +39,21 @@ test('has title', async ({ page }) => {
 });
 
 test('delete article', async ({ page, request }) => {
-  const response = await request.post('https://conduit-api.bondaracademy.com/api/users/login', {
-    data: {
-      user: { email: "pwtest_90@test.com", password: "welcome123" }
-    }
-  })
+  // const response = await request.post('https://conduit-api.bondaracademy.com/api/users/login', {
+  //   data: {
+  //     user: { email: "pwtest_90@test.com", password: "welcome123" }
+  //   }
+  // })
 
-  const responseBody = await response.json()
-  const accessToken = responseBody.user.token
-  // console.log(accessToken)
+  // const responseBody = await response.json()
+  // const accessToken = responseBody.user.token
+  
 
   const articleResponse = await request.post('https://conduit-api.bondaracademy.com/api/articles/', {
-    data: { article: { "tagList": [], "title": "This is a test article", description: "This is a test description", "body": "This is a test body" } },
-    headers: {
-      Authorization: `Token ${accessToken}`
-    }
+    data: { article: { "tagList": [], "title": "This is a test article", description: "This is a test description", "body": "This is a test body" } }
+    // headers: {
+    //   Authorization: `Token ${accessToken}`
+    // }
   })
   expect(articleResponse.status()).toBe(201)
 
@@ -81,20 +81,22 @@ test('create article', async ({ page, request }) => {
   await page.getByText('Global Feed').click()
   await expect(page.locator('app-article-list h1').first()).toContainText('Playwright is awesome!')
 
-  const response = await request.post('https://conduit-api.bondaracademy.com/api/users/login', {
-    data: {
-      user: { email: "pwtest_90@test.com", password: "welcome123" }
-    }
-  })
+  // const response = await request.post('https://conduit-api.bondaracademy.com/api/users/login', {
+  //   data: {
+  //     user: { email: "pwtest_90@test.com", password: "welcome123" }
+  //   }
+  // })
 
-  const responseBody = await response.json()
-  const accessToken = responseBody.user.token
+  // const responseBody = await response.json()
+  // const accessToken = responseBody.user.token
 
-  const deleteArticleResponse = await request.delete(`https://conduit-api.bondaracademy.com/api/articles/${slugId}`, {
-    headers: {
-      Authorization: `Token ${accessToken}`
-    }
-  })
+  const deleteArticleResponse = await request.delete(`https://conduit-api.bondaracademy.com/api/articles/${slugId}`
+    // , {
+    // headers: {
+    //   Authorization: `Token ${accessToken}`
+    // }
+  // }
+)
 
   expect(deleteArticleResponse.status()).toEqual(204)
 })
