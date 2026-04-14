@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/DanyJDuque/pw-apitest-app#readme",
   "devDependencies": {
-    "@playwright/test": "^1.58.2",
+    "@playwright/test": "^1.59.1",
     "@types/node": "^25.5.0"
   }
 }
