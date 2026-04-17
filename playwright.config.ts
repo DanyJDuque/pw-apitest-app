@@ -30,11 +30,16 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+    video: 'on',
     extraHTTPHeaders: {
       'Authorization': `Token ${process.env.ACCESS_TOKEN}`,
 
     }
   },
+
+  globalSetup: './global-setup.ts',
+  globalTeardown: './global-teardown.ts',
+
 
   /* Configure projects for major browsers */
   projects: [
@@ -47,10 +52,11 @@ export default defineConfig({
     },
     {
       name: 'articleCleanUp',
-      testMatch: 'articleCleanUp.setup.ts'    
+      testMatch: 'articleCleanUp.setup.ts'
     },
     {
       name: 'regression',
+      testIgnore: 'likesCounter.spec.ts',
       use: { ...devices['Desktop Chrome'], storageState: '.auth/user.json' },
       dependencies: ['setup']
     },
@@ -60,7 +66,10 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'], storageState: '.auth/user.json' },
       dependencies: ['articleSetup']
     },
-
+    {
+      name: 'LikeCounterGlobal',
+      testMatch: 'likesCounterGlobal.spec.ts',
+      use: { ...devices['Desktop Chrome'], storageState: '.auth/user.json' }
+    },
   ],
-
 });
